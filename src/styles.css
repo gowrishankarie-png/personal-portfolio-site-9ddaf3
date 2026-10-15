@@ -1,0 +1,206 @@
+@import "tailwindcss" source("../");
+
+@plugin "tailwindcss-animate";
+
+/* ───────────────────────── Darkroom palette ─────────────────────────
+   Bone paper, warm ink, and exactly one loud colour: safelight vermilion. */
+:root {
+  --paper: #ece5d8;
+  --paper-deep: #e2d9c8;
+  --ink: #1c1915;
+  --ink-soft: #3a342c;
+  --smoke: #6e655a;
+  --line: rgb(28 25 21 / 0.16);
+  --vermilion: #d2462b;
+  --vermilion-deep: #b03a22;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--smoke);
+  --accent: var(--vermilion);
+  --accent-foreground: var(--paper);
+  --destructive: var(--vermilion-deep);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--vermilion);
+  --radius: 0px;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-smoke: var(--smoke);
+  --color-line: var(--line);
+  --color-vermilion: var(--vermilion);
+  --color-vermilion-deep: var(--vermilion-deep);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+
+  --font-display: 'Gloock', 'Times New Roman', serif;
+  --font-sans: 'Familjen Grotesk', 'Helvetica Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply m-0 bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--vermilion);
+    color: var(--paper);
+  }
+  :focus-visible {
+    outline: 2px solid var(--vermilion);
+    outline-offset: 3px;
+  }
+}
+
+/* Fixed film-grain overlay: sits above everything, never intercepts clicks. */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.11;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Small mono caption used for frame numbers, metadata and labels. */
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Crop marks in each corner of a framed element. */
+.crop {
+  position: relative;
+}
+.crop::before,
+.crop::after,
+.crop > .crop-b::before,
+.crop > .crop-b::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--ink);
+  pointer-events: none;
+  z-index: 2;
+}
+.crop::before { top: -8px; left: -8px; border-top: 1px solid; border-left: 1px solid; }
+.crop::after { top: -8px; right: -8px; border-top: 1px solid; border-right: 1px solid; }
+.crop > .crop-b::before { bottom: -8px; left: -8px; border-bottom: 1px solid; border-left: 1px solid; }
+.crop > .crop-b::after { bottom: -8px; right: -8px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* Staggered "developing" reveal for page load. */
+.develop {
+  opacity: 0;
+  animation: develop 0.9s cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes develop {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px) sepia(0.6); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* Scroll-triggered reveal (toggled by the useReveal hook). */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.1, 1);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Infinite film-strip marquee. */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 48s linear infinite;
+}
+.marquee:hover { animation-play-state: paused; }
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* Long-form case-study copy rendered from Markdown. */
+.prose-case h2 {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  line-height: 1.1;
+  margin: 3rem 0 1rem;
+}
+.prose-case p {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin: 0 0 1.25rem;
+  max-width: 62ch;
+}
+.prose-case > p:first-child {
+  font-size: 1.5rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain, .marquee { animation: none; }
+  .develop { animation: none; opacity: 1; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
